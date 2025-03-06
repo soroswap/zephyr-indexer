@@ -25,3 +25,7 @@ col_type = "BYTEA"
 [[tables.columns]]
 name = "reserve_b"
 col_type = "BYTEA"
+
+[[tables.columns]]
+name = "fee"
+col_type = "BYTEA"

@@ -9,6 +9,7 @@ struct PairsTable {
     token_b: ScVal,
     reserve_a: ScVal,
     reserve_b: ScVal,
+    fee: ScVal
 }
 
 //Phoenix Factory
@@ -91,6 +92,7 @@ pub extern "C" fn on_close() {
                     reserve_b: env.to_scval(0),
                     token_a: env.to_scval("0"),
                     token_b: env.to_scval("0"),
+                    fee: env.to_scval(0)
                 };
 
                 for entry in pair_entries {
@@ -101,6 +103,7 @@ pub extern "C" fn on_close() {
 
                         table.token_a = env.to_scval(config_data.token_a.to_string());
                         table.token_b = env.to_scval(config_data.token_b.to_string());
+                        table.fee = env.to_scval(config_data.total_fee_bps);
                     }
 
                     if entry.key == env.to_scval(PairDataKey::ReserveA){
@@ -118,14 +121,9 @@ pub extern "C" fn on_close() {
                 }else{
                     table.put(&env);
                 }
-
             });
         }
-        
     }
-
-   
-      
 }            
 
 

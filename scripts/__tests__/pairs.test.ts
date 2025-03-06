@@ -1,9 +1,9 @@
 // import fs from "fs";
 import { zephyrTableToGraphQLParser} from "mercury-sdk";
-import { getPairs } from "../utils/get-pairs";
+import { getAquaPairs, getPairs } from "../utils/get-pairs";
 import { getTotalPairs } from "../utils/get-total-pairs";
 import { getZephyrTable } from "../utils/get-table";
-import fs from "fs";
+import { getFeesFromPair } from "../utils/get-fees-from-pair";
 
   
 test("soroswap pairs in MAINNET return non empty array", async () => {
@@ -54,6 +54,18 @@ test.todo("aqua pairs in TESTNET return non empty array");
 test.todo("aqua pairs in TESTNET is equal to Factory all_pairs_length()");
 
 test.todo("aqua pairs in MAINNET return non empty array");
+test("aqua pairs in MAINNET amount is greater than 0", async () => {
+  const aquaPairsTable = getZephyrTable('aqua_pairs', "MAINNET")
+  const zephyrTableGraphQL = zephyrTableToGraphQLParser(aquaPairsTable);
+  const pairs = await getAquaPairs(zephyrTableGraphQL.address, 'MAINNET');
+  for(let pair of pairs){
+    const address = pair.address;
+    const fee = pair.fee;
+    const blockchainFee = await getFeesFromPair('aqua', 'MAINNET', address)
+    console.log('🟡blockchainFee', blockchainFee)
+    //To do: check if blockchainFee are equal to fee
+  }
+});
 test.todo("aqua pairs in MAINNET is equal to Factory all_pairs_length()");
 
 

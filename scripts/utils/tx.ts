@@ -1,5 +1,6 @@
 import { Account, Keypair, rpc, Transaction, TransactionBuilder, xdr } from '@stellar/stellar-sdk';
 import { EnvConfig } from './env_config.js';
+import { AxiosClient } from '@stellar/stellar-sdk/rpc';
 
 type txResponse = rpc.Api.SendTransactionResponse | rpc.Api.GetTransactionResponse;
 type txStatus = rpc.Api.SendTransactionStatus | rpc.Api.GetTransactionStatus;

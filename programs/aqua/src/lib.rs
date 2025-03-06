@@ -26,6 +26,7 @@ struct PairsTable {
     token_b: ScVal,
     reserve_a: ScVal,
     reserve_b: ScVal,
+    fee: ScVal
 }
 
 #[no_mangle]
@@ -37,7 +38,6 @@ pub extern "C" fn on_close() {
     let lp_router_contract = stellar_strkey::Contract::from_string(&contract_address_str).unwrap().0;
 
     let rows = env.read::<PairsTable>();
-    env.log().debug(format!("rows: {:?}", &rows), None);
 
     let lp_router_contract_events: Vec<PrettyContractEvent> = {
         let events = env.reader().pretty().soroban_events();
@@ -54,8 +54,6 @@ pub extern "C" fn on_close() {
     };
 
     for t_event in lp_router_contract_events {
-        env.log().debug(format!("event: {:?}", &t_event), None);
-
         let action: Symbol = env.from_scval(&t_event.topics[0]);
         let tokens: SorobanVec<Address> = env.from_scval(&t_event.topics[1]);
 
@@ -88,6 +86,7 @@ pub extern "C" fn on_close() {
                         reserve_b: env.to_scval(0),
                         token_a: env.to_scval(tokens.first()),
                         token_b: env.to_scval(tokens.last()),
+                        fee: env.to_scval(0)
                     };
         
                     env.log().debug(format!("New action Table: {:?}", table), None);
@@ -119,6 +118,7 @@ pub(crate) fn handle_add(env: &EnvClient, event: &PrettyContractEvent, data_leng
             
             let mut reserve_a: u128 = 0;
             let mut reserve_b: u128 = 0;
+            let mut fee_fraction: u32 = 0;
 
             if let Some(instance) = instance_storage {
                 if let LedgerEntryData::ContractData(contract_data_entry) = &instance.entry.data {
@@ -126,7 +126,6 @@ pub(crate) fn handle_add(env: &EnvClient, event: &PrettyContractEvent, data_leng
                         if let Some(storage_map) = &contract_instance.storage {
 
                             for entry in storage_map.iter() {
-
                                 if let ScVal::Vec(Some(vec)) = &entry.key {
                                     if let Some(ScVal::Symbol(symbol)) = vec.first() {
 
@@ -140,8 +139,12 @@ pub(crate) fn handle_add(env: &EnvClient, event: &PrettyContractEvent, data_leng
                                                 env.log().debug(format!("ReseveB: {:?}", entry), None);
                                                 reserve_b = parts.lo.into()
                                             }
+                                        } else if symbol.to_string() == "FeeFraction" {
+                                            if let ScVal::U32(fee) = &entry.val {
+                                                env.log().debug(format!("FeeFraction: {:?}", entry), None);
+                                                fee_fraction = fee.clone()
+                                            }
                                         }
-
                                     }
                                 }
                             }
@@ -159,6 +162,7 @@ pub(crate) fn handle_add(env: &EnvClient, event: &PrettyContractEvent, data_leng
                 reserve_b: env.to_scval(reserve_b),
                 token_a: env.to_scval(tokens.first()),
                 token_b: env.to_scval(tokens.last()),
+                fee: env.to_scval(fee_fraction)
             };
 
             env.log().debug(format!("New action Table: {:?}", table), None);
