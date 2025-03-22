@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 zephyr-sdk = { version = "0.2.1" }
 stellar-strkey = "0.0.8"
+thiserror = "1.0"
 soroban-sdk = { version = "21.5.0" }
 
 [lib]
